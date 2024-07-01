@@ -1,260 +1,430 @@
 import 'package:flutter/material.dart';
-import 'bottom_nav_bar.dart';
-import 'category_card.dart';
 import 'map.dart';
-import 'news_service.dart';
-import 'news_model.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../languages/lang.dart';
+import 'news_model.dart';
+import 'NewsDetailPage.dart';
 
-class HomeScreen extends StatefulWidget {
-  final Language selectedLanguage;
-
-  const HomeScreen({Key? key, required this.selectedLanguage}) : super(key: key);
-
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  _HomePageState createState() => _HomePageState();
 }
-class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<Article>> futureArticles;
 
-  @override
-  void initState() {
-    super.initState();
-    futureArticles = ArticleService().fetchArticles();
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
-
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
     return Scaffold(
-      bottomNavigationBar: BottomNavBar(),
-      body: Stack(
-        children: <Widget>[
-          Container(
-            padding:const EdgeInsets.fromLTRB(20, 50, 20, 30),
-            height: size.height * .32,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(50)),
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF00897B), Color(0xFF80CBC4),
-                ],
-              ),
-            ),
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            _buildPatientInfo(),
+            _buildCarouselSection(),
+            _buildClinicNews(),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
+      decoration: const BoxDecoration(
+        color: Color(0xFF1AD0C0),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              Icon(Icons.notifications, color: Colors.white),
+              SizedBox(width: 10),
+            ],
           ),
-          Positioned(
-            top: 50,
-            left: 20,
-            child: CircleAvatar(
-              radius: 35.0,
-              backgroundImage: AssetImage('assets/images/i.jpg'),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    SizedBox(height: 60),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        widget.selectedLanguage == Language.Arabic
-                            ? "دليل طبي"
-                            : widget.selectedLanguage == Language.Persian
-                            ? "راهنمای پزشکی"
-                            : widget.selectedLanguage == Language.English
-                            ? "Medical Guide"
-                            : widget.selectedLanguage == Language.Kurdish
-                            ? "راهنمای پزیشکی"
-                            : "",
-                        style: Theme.of(context).textTheme.headline6?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          fontFamily: 'Changa-VariableFont_wght',
-                          color: Colors.white,
-                          fontSize: 35,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        widget.selectedLanguage == Language.Arabic
-                            ? "رفيقك الصحي"
-                            : widget.selectedLanguage == Language.Persian
-                            ? "همراه سلامت شما"
-                            : widget.selectedLanguage == Language.English
-                            ? "Your Health Companion"
-                            : widget.selectedLanguage == Language.Kurdish
-                            ? "هاوڕێی سلامەتیت"
-                            : "",
-                        style: Theme.of(context).textTheme.headline6?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          fontFamily: 'Changa-VariableFont_wght',
-                          fontSize: 30,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    ClipRRect(child: SizedBox(height: 150)),
-                    ClipRRect(
-                      child: SizedBox(
-                        height: 250,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.all(10),
-                          children: <Widget>[
-                            CategoryCard(
-                              key: Key('1'),
-                              title: widget.selectedLanguage == Language.Arabic
-                                  ? "الخريطة"
-                                  : widget.selectedLanguage == Language.Persian
-                                  ? "نقشه"
-                                  : widget.selectedLanguage == Language.English
-                                  ? "Map"
-                                  : widget.selectedLanguage == Language.Kurdish
-                                  ? "نەخشە"
-                                  : "",
-                              press: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) {
-                                      return MyApp();
-                                    },
-                                  ),
-                                );
-                              },
-                              svgScr: 'assets/icons/map-svgrepo-com.svg',
-                            ),
-                            SizedBox(width: 10.0),
-                            CategoryCard(
-                              key: Key('2'),
-                              title: widget.selectedLanguage == Language.Arabic
-                                  ? "معلومات الزائر"
-                                  : widget.selectedLanguage == Language.Persian
-                                  ? "اطلاعات بازدید کننده"
-                                  : widget.selectedLanguage == Language.English
-                                  ? "Visitor Information"
-                                  : widget.selectedLanguage == Language.Kurdish
-                                  ? "زانیاری سەرنجەمەند"
-                                  : "",
-                              press: () {},
-                              svgScr: 'assets/icons/list-svgrepo-com.svg',
-                            ),
-                            SizedBox(width: 10.0),
-                            CategoryCard(
-                              key: Key('3'),
-                              title: widget.selectedLanguage == Language.Arabic
-                                  ? "عدد الزيارات"
-                                  : widget.selectedLanguage == Language.Persian
-                                  ? "تعداد بازدیدها"
-                                  : widget.selectedLanguage == Language.English
-                                  ? "Number of Visits"
-                                  : widget.selectedLanguage == Language.Kurdish
-                                  ? "ژمارەی سەردانەکان"
-                                  : "",
-                              press: () {},
-                              svgScr: 'assets/icons/hospital-svgrepo-com.svg',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                      child: ClipRRect(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                widget.selectedLanguage == Language.Arabic
-                                    ? 'اخر الاحداث'
-                                    : widget.selectedLanguage == Language.Persian
-                                    ? 'آخرین اخبار'
-                                    : widget.selectedLanguage == Language.English
-                                    ? 'Latest News'
-                                    : widget.selectedLanguage == Language.Kurdish
-                                    ? 'وەڵامەکانی نوێترین'
-                                    : '',
-                                style: Theme.of(context).textTheme.headline6?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  fontFamily: 'Changa-VariableFont_wght',
-                                  fontSize: 25,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    FutureBuilder<List<Article>>(
-                      future: futureArticles,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Center(child: Text('Failed to load articles'));
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return Center(child: Text('No articles available'));
-                        } else {
-                          return CarouselSlider(
-                            options: CarouselOptions(
-                              height: 400,
-                              autoPlay: true,
-                              enlargeCenterPage: true,
-                            ),
-                            items: snapshot.data!.map((article) {
-                              return Builder(
-                                builder: (BuildContext context) {
-                                  return Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    margin: EdgeInsets.symmetric(horizontal: 5.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      child: Container(
-                                        color: Colors.white,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Image.network(article.imageUrl, height: 200, fit: BoxFit.cover),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                article.title,
-                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                              child: Text(
-                                                article.description,
-                                                style: TextStyle(fontSize: 14.0),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }).toList(),
-                          );
-                        }
-                      },
-                    ),
-                  ],
+          Row(
+            children: [
+              Text(
+                'مرحباً، يوسف!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
+              CircleAvatar(
+                //  backgroundImage: AssetImage('assets/profile.png'),
+                radius: 30,
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+  Widget _buildPatientInfo() {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end, // تحديد الزاوية اليمنى
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.end, // تحديد الزاوية اليمنى
+                children: [
+                  // IconButton(
+                  //   icon: Icon(Icons.edit, color: Colors.blue),
+                  //   onPressed: () {
+                  //     // Implement edit functionality
+                  //   },
+                  // ),
+                  Text(
+                    'معلومات المريض',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Icon(Icons.person, color: Colors.blue),
+                ],
+              ),
+              const SizedBox(height: 10),
+              _buildInfoRow('الاسم', 'يوسف علي'),
+              _buildInfoRow('العمر', '34'),
+              _buildInfoRow('فصيلة الدم', 'A+'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  Widget _buildInfoRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        textDirection: TextDirection.rtl,
+        children: [
+          Text(
+            '$title: ',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(value),
+        ],
+      ),
+    );
+  }
+  Widget _buildCarouselSection() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: CarouselSlider(
+        options: CarouselOptions(
+          height: 200,
+          enableInfiniteScroll: false,
+          enlargeCenterPage: true,
+        ),
+        items: [
+          _buildMapCard(),
+          _buildQRCodeCard(),
+          _buildClinicVisitsCard(),
+        ],
+      ),
+    );
+  }
+  Widget _buildMapCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 20,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Card(
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: InkWell(
+          onTap: () {
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => MyApp()),
+            // );
+          },
+          child: const Padding(
+            padding: EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'الخريطة',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Icon(Icons.map, color: Colors.green),
+                  ],
+                ),
+                SizedBox(height: 11),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQRCodeCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Card(
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'رمز الاستجابة السريعة',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Icon(Icons.qr_code, color: Colors.purple),
+                ],
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClinicVisitsCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Card(
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'زيارات العيادة',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Icon(Icons.history, color: Colors.orange),
+                ],
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClinicNews() {
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'آخر الأحداث',
+              style: Theme.of(context).textTheme.headline6?.copyWith(
+                fontWeight: FontWeight.w900,
+                fontFamily: 'Changa-VariableFont_wght',
+                fontSize: 25,
+              ),
+            ),
+          ),
+        ),
+        FutureBuilder<List<Article>>(
+          future: NewsService().fetchArticles(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Center(child: Text('Failed to load articles'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No articles available'));
+            } else {
+              return CarouselSlider(
+                options: CarouselOptions(
+
+                  height: 300,
+                  autoPlay: true,
+                  enlargeCenterPage: true,
+                ),
+                items: snapshot.data!.map((article) {
+                  return Builder(
+                    builder: (BuildContext context) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NewsDetailPage(article: article),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          margin: EdgeInsets.symmetric(horizontal: 5.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Image.network(
+                                article.imageUrl,
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  article.title,
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      margin: const EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey,
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10.0),
+        child: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'الرئيسية',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.business),
+              label: 'العيادة',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.school),
+              label: 'أخرى',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Color(0xFF1AD0C0),
+          unselectedItemColor: Colors.blueGrey,
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }

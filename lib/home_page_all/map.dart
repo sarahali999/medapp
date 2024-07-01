@@ -45,9 +45,6 @@ class _MyAppState extends State<MyApp> {
      ];
 
   }
-
-
-
   _updateUserLocationMarker() {
     Marker userLocationMarker = Marker(
       key: ValueKey("userLocation"),
